@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     id("org.jetbrains.kotlin.jvm").version("1.9.22")
     id("java-library")
+    id("maven-publish")
     id("io.gitlab.arturbosch.detekt") version "1.22.0"
     jacoco
 }
@@ -64,4 +65,16 @@ dependencies {
     // KeePass
     implementation("com.github.anvell:kotpass:0.7.0")
     implementation("com.squareup.okio:okio:3.2.0")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = appGroupId
+            artifactId = appArtifactId
+            version = appVersion
+
+            from(components["java"])
+        }
+    }
 }
