@@ -3,20 +3,20 @@ package com.github.aivanovski.keepasstreebuilder
 import com.github.aivanovski.keepasstreebuilder.TestData.BINARY_KEY_CONTENT
 import com.github.aivanovski.keepasstreebuilder.TestData.PASSWORD
 import com.github.aivanovski.keepasstreebuilder.TestData.newDatabase
-import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
-import com.github.aivanovski.keepasstreebuilder.extensions.writeToFile
 import com.github.aivanovski.keepasstreebuilder.extensions.buildNodeTree
 import com.github.aivanovski.keepasstreebuilder.extensions.readDatabase
 import com.github.aivanovski.keepasstreebuilder.extensions.toByteArray
 import com.github.aivanovski.keepasstreebuilder.extensions.traverse
 import com.github.aivanovski.keepasstreebuilder.extensions.write
+import com.github.aivanovski.keepasstreebuilder.extensions.writeToFile
+import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey.BinaryKey
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey.PasswordKey
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import java.nio.file.Path
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.io.TempDir
 
 class DatabaseBuilderDslTest {
 

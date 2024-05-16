@@ -82,6 +82,6 @@ private fun Entry.toEntity(): EntryEntity {
         created = times?.creationTime ?: Instant.now(),
         modified = times?.lastModificationTime ?: Instant.now(),
         expires = times?.expiryTime,
-        fields = fields,
+        fields = fields
     )
 }
