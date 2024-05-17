@@ -85,17 +85,18 @@ class KotpassDatabaseConverter :
 
     private fun EntryEntity.toKotpassEntry(): Entry {
         val fields = fields.map { (key, value) ->
-            when (key) {
-                Fields.PASSWORD -> {
-                    key to EntryValue.Encrypted(EncryptedValue.fromString(value))
-                }
-
-                else -> {
-                    key to EntryValue.Plain(value)
-                }
+            val kotpassValue = when (key) {
+                Fields.PASSWORD -> EntryValue.Encrypted(EncryptedValue.fromString(value))
+                else -> EntryValue.Plain(value)
             }
+
+            key to kotpassValue
         }
             .toMap()
+
+        val historyEntries = history.map { entry ->
+            entry.toKotpassEntry()
+        }
 
         return Entry(
             uuid = uuid,
@@ -107,7 +108,8 @@ class KotpassDatabaseConverter :
                 locationChanged = null,
                 expiryTime = expires,
                 expires = (expires != null)
-            )
+            ),
+            history = historyEntries
         )
     }
 
