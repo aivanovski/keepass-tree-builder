@@ -77,11 +77,14 @@ private fun Entry.toEntity(): EntryEntity {
         fields[key] = value.content
     }
 
+    val historyEntities = history.map { entry -> entry.toEntity() }
+
     return EntryEntity(
         uuid = uuid,
         created = times?.creationTime ?: Instant.now(),
         modified = times?.lastModificationTime ?: Instant.now(),
         expires = times?.expiryTime,
-        fields = fields
+        fields = fields,
+        history = historyEntities
     )
 }
