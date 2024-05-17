@@ -4,7 +4,7 @@ The library offers DSL for generatig KeePass database files
 
 # Installation
 This library is available in [Jitpack](https://jitpack.io/#aivanovski/keepass-tree-builder) repository
-```
+```gradle
 repositories {
     maven {
         maven { url 'https://jitpack.io' }
@@ -17,7 +17,7 @@ dependencies {
 ```
 
 # Usage
-```
+```kotlin
 DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
     .key(DatabaseKey.PasswordKey("123456"))
     .content(newGroupFrom("Root Group")) {
