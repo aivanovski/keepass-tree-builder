@@ -10,7 +10,7 @@ plugins {
 
 val appGroupId = "com.github.aivanovski"
 val appArtifactId = "keepass-tree-builder"
-val appVersion = "0.1.0"
+val appVersion = "0.2.0"
 
 group = appGroupId
 version = appVersion
