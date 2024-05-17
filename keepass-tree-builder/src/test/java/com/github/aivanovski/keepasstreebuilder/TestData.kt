@@ -33,7 +33,6 @@ object TestData {
         )
     )
 
-
     fun newDatabase(
         key: DatabaseKey
     ): Database<DatabaseElement, KeePassDatabase> {

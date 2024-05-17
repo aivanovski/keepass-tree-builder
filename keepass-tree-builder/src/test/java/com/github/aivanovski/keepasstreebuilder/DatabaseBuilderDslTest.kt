@@ -158,7 +158,7 @@ class DatabaseBuilderDslTest {
             Fields.TITLE to EntryValue.Plain::class,
             Fields.USERNAME to EntryValue.Plain::class,
             Fields.URL to EntryValue.Plain::class,
-            Fields.NOTES to EntryValue.Plain::class,
+            Fields.NOTES to EntryValue.Plain::class
         )
             .forEach { (field, expectedType) ->
                 entry.fields[field] should beInstanceOf(expectedType)
