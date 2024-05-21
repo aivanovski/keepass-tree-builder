@@ -2,12 +2,7 @@ package com.github.aivanovski.keepasstreebuilder.extensions
 
 import java.io.BufferedOutputStream
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
-
-fun File.write(data: String) {
-    write(data.toByteArray())
-}
 
 fun File.write(bytes: ByteArray) {
     BufferedOutputStream(FileOutputStream(this, false)).use { out ->
@@ -16,6 +11,9 @@ fun File.write(bytes: ByteArray) {
     }
 }
 
-fun File.read(): ByteArray {
-    return FileInputStream(this).readAllBytes()
+fun Any.resourceAsBytes(name: String): ByteArray {
+    val stream = this.javaClass.classLoader.getResourceAsStream(name)
+    checkNotNull(stream)
+
+    return stream.readAllBytes()
 }

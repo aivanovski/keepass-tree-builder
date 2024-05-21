@@ -1,28 +1,22 @@
 package com.github.aivanovski.keepasstreebuilder.extensions
 
 import app.keemobile.kotpass.database.KeePassDatabase
-import app.keemobile.kotpass.database.decode
+import app.keemobile.kotpass.database.modifiers.binaries
+import app.keemobile.kotpass.models.BinaryData
 import app.keemobile.kotpass.models.Entry
 import app.keemobile.kotpass.models.Group
 import com.github.aivanovski.keepasstreebuilder.Fields
-import com.github.aivanovski.keepasstreebuilder.converter.kotpass.KotpassDatabaseConverter.Companion.toCredentials
+import com.github.aivanovski.keepasstreebuilder.model.Binary
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseEntity
-import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseNode
 import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
+import com.github.aivanovski.keepasstreebuilder.model.Hash
+import com.github.aivanovski.keepasstreebuilder.model.HashType
 import com.github.aivanovski.keepasstreebuilder.model.MutableDatabaseNode
-import java.io.File
-import java.io.FileInputStream
 import java.time.Instant
 import java.util.LinkedList
-
-fun File.readDatabase(key: DatabaseKey): KeePassDatabase {
-    return KeePassDatabase.decode(
-        inputStream = FileInputStream(this),
-        credentials = key.toCredentials()
-    )
-}
+import okio.ByteString
 
 fun KeePassDatabase.buildNodeTree(): DatabaseNode<DatabaseEntity> {
     val rootGroup = content.group
@@ -50,8 +44,8 @@ fun KeePassDatabase.buildNodeTree(): DatabaseNode<DatabaseEntity> {
 
         for (entry in group.entries) {
             val entryNode = MutableDatabaseNode<DatabaseEntity>(
-                entity = entry.toEntity(),
-                originalEntity = entry.toEntity()
+                entity = entry.toEntity(allBinaries = binaries),
+                originalEntity = entry.toEntity(allBinaries = binaries)
             )
 
             node.nodes.add(entryNode)
@@ -70,14 +64,26 @@ private fun Group.toEntity(): GroupEntity {
     )
 }
 
-private fun Entry.toEntity(): EntryEntity {
+private fun Entry.toEntity(
+    allBinaries: Map<ByteString, BinaryData> = emptyMap()
+): EntryEntity {
     val fields = mutableMapOf<String, String>()
 
     for ((key, value) in this.fields.entries) {
         fields[key] = value.content
     }
 
-    val historyEntities = history.map { entry -> entry.toEntity() }
+    val historyEntities = history.map { entry -> entry.toEntity(allBinaries) }
+    val binaryEntries = binaries.mapNotNull { binaryRef ->
+        val key = binaryRef.hash
+        val data = allBinaries[key]?.rawContent ?: return@mapNotNull null
+
+        Binary(
+            name = binaryRef.name,
+            hash = Hash(type = HashType.SHA_256, data = binaryRef.hash.toByteArray()),
+            data = data
+        )
+    }
 
     return EntryEntity(
         uuid = uuid,
@@ -85,6 +91,7 @@ private fun Entry.toEntity(): EntryEntity {
         modified = times?.lastModificationTime ?: Instant.now(),
         expires = times?.expiryTime,
         fields = fields,
-        history = historyEntities
+        history = historyEntities,
+        binaries = binaryEntries
     )
 }
