@@ -9,7 +9,6 @@ import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newEntry
 import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newGroupFrom
 import com.github.aivanovski.keepasstreebuilder.model.Database
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
-import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 
 object TestData {
 

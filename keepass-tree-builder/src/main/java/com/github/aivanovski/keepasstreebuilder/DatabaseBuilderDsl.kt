@@ -1,7 +1,6 @@
 package com.github.aivanovski.keepasstreebuilder
 
 import com.github.aivanovski.keepasstreebuilder.converter.Converter
-import com.github.aivanovski.keepasstreebuilder.model.Binary
 import com.github.aivanovski.keepasstreebuilder.model.Database
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseNode
