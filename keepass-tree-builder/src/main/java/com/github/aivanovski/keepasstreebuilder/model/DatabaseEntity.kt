@@ -18,5 +18,6 @@ data class EntryEntity(
     val modified: Instant,
     val expires: Instant?,
     val fields: Map<String, String>,
-    val history: List<EntryEntity>
+    val history: List<EntryEntity>,
+    val binaries: List<Binary>
 ) : DatabaseEntity

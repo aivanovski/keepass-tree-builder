@@ -1,24 +1,36 @@
 package com.github.aivanovski.keepasstreebuilder
 
+import app.keemobile.kotpass.database.KeePassDatabase
+import app.keemobile.kotpass.database.decode
+import app.keemobile.kotpass.models.DatabaseElement
 import app.keemobile.kotpass.models.EntryValue
 import com.github.aivanovski.keepasstreebuilder.DatabaseBuilderDsl.newBuilder
 import com.github.aivanovski.keepasstreebuilder.TestData.COMPOSITE_KEY
+import com.github.aivanovski.keepasstreebuilder.TestData.ENTRY_WITH_BINARIES
+import com.github.aivanovski.keepasstreebuilder.TestData.ENTRY_WITH_HISTORY
 import com.github.aivanovski.keepasstreebuilder.TestData.FILE_KEY
 import com.github.aivanovski.keepasstreebuilder.TestData.PASSWORD_KEY
-import com.github.aivanovski.keepasstreebuilder.TestData.ROOT
+import com.github.aivanovski.keepasstreebuilder.TestData.ROOT_GROUP
 import com.github.aivanovski.keepasstreebuilder.TestData.newDatabase
+import com.github.aivanovski.keepasstreebuilder.TestData.newDatabaseWithBinaries
+import com.github.aivanovski.keepasstreebuilder.TestData.newDatabaseWithHistory
 import com.github.aivanovski.keepasstreebuilder.converter.kotpass.KotpassDatabaseConverter
+import com.github.aivanovski.keepasstreebuilder.converter.kotpass.KotpassDatabaseConverter.Companion.toCredentials
 import com.github.aivanovski.keepasstreebuilder.extensions.buildNodeTree
-import com.github.aivanovski.keepasstreebuilder.extensions.readDatabase
 import com.github.aivanovski.keepasstreebuilder.extensions.toByteArray
-import com.github.aivanovski.keepasstreebuilder.extensions.traverse
+import com.github.aivanovski.keepasstreebuilder.extensions.traverseAndCollect
 import com.github.aivanovski.keepasstreebuilder.extensions.write
 import com.github.aivanovski.keepasstreebuilder.extensions.writeToFile
 import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newEntryFrom
+import com.github.aivanovski.keepasstreebuilder.model.Database
+import com.github.aivanovski.keepasstreebuilder.model.DatabaseEntity
+import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.beInstanceOf
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.FileInputStream
 import java.nio.file.Path
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -29,83 +41,27 @@ class DatabaseBuilderDslTest {
     lateinit var tempDir: Path
 
     @Test
-    fun `dsl should work with password key`() {
-        // arrange
-        val dbFile = newDbFile()
-        dbFile.exists() shouldBe false
+    fun `should work with different keys`() {
+        listOf(
+            PASSWORD_KEY,
+            FILE_KEY,
+            COMPOSITE_KEY
+        ).forEach { key ->
+            // arrange
+            val db = newDatabase(key)
 
-        // act
-        val db = newDatabase(PASSWORD_KEY)
-            .apply {
-                writeToFile(dbFile)
-            }
+            // act
+            val entities = db
+                .toByteArray()
+                .readDatabaseEntities(key)
 
-        // assert
-        val expectedEntities = db.root.traverse { node -> node.originalEntity }
-
-        val actualEntities = dbFile.readDatabase(PASSWORD_KEY)
-            .buildNodeTree()
-            .traverse { node -> node.entity }
-
-        actualEntities shouldBe expectedEntities
+            // assert
+            entities shouldBe db.collectAllEntities()
+        }
     }
 
     @Test
-    fun `dsl should work with binary key`() {
-        // arrange
-        val keyFile = newKeyFile()
-        val dbFile = newDbFile()
-
-        keyFile.write(FILE_KEY.binaryData)
-
-        keyFile.exists() shouldBe true
-        dbFile.exists() shouldBe false
-
-        // act
-        val db = newDatabase(FILE_KEY)
-            .apply {
-                writeToFile(dbFile)
-            }
-
-        // assert
-        val expectedEntities = db.root.traverse { node -> node.originalEntity }
-
-        val actualEntities = dbFile.readDatabase(FILE_KEY)
-            .buildNodeTree()
-            .traverse { node -> node.entity }
-
-        actualEntities shouldBe expectedEntities
-    }
-
-    @Test
-    fun `dsl should work with composite key`() {
-        // arrange
-        val keyFile = newKeyFile()
-        val dbFile = newDbFile()
-
-        keyFile.write(COMPOSITE_KEY.binaryData)
-
-        keyFile.exists() shouldBe true
-        dbFile.exists() shouldBe false
-
-        // act
-        val db = newDatabase(COMPOSITE_KEY)
-            .apply {
-                writeToFile(dbFile)
-            }
-
-        // assert
-        val expectedEntities = db.root.traverse { node -> node.originalEntity }
-
-        val actualEntities = dbFile.readDatabase(COMPOSITE_KEY)
-            .buildNodeTree()
-            .traverse { node -> node.entity }
-
-        actualEntities shouldBe expectedEntities
-    }
-
-    @Test
-    fun `toByteArray should work`() {
+    fun `should work if db written to file`() {
         // arrange
         val dbFile = newDbFile()
         dbFile.exists() shouldBe false
@@ -117,17 +73,15 @@ class DatabaseBuilderDslTest {
             }
 
         // assert
-        val expectedEntities = db.root.traverse { node -> node.originalEntity }
+        val actualEntities = dbFile
+            .readBytes()
+            .readDatabaseEntities(PASSWORD_KEY)
 
-        val actualEntities = dbFile.readDatabase(PASSWORD_KEY)
-            .buildNodeTree()
-            .traverse { node -> node.entity }
-
-        actualEntities shouldBe expectedEntities
+        actualEntities shouldBe db.collectAllEntities()
     }
 
     @Test
-    fun `entry values should be valid`() {
+    fun `entry values should have valid values`() {
         // arrange
         val dbFile = newDbFile()
         val expectedEntry = newEntryFrom(id = 1)
@@ -135,7 +89,7 @@ class DatabaseBuilderDslTest {
         // act
         newBuilder(KotpassDatabaseConverter())
             .key(PASSWORD_KEY)
-            .content(ROOT) {
+            .content(ROOT_GROUP) {
                 entry(expectedEntry)
             }
             .build()
@@ -147,8 +101,8 @@ class DatabaseBuilderDslTest {
         val actualDb = dbFile.readDatabase(PASSWORD_KEY)
 
         val group = actualDb.content.group
-        group.uuid shouldBe ROOT.uuid
-        group.name shouldBe ROOT.fields[Fields.TITLE]
+        group.uuid shouldBe ROOT_GROUP.uuid
+        group.name shouldBe ROOT_GROUP.fields[Fields.TITLE]
 
         val entry = actualDb.content.group.entries.first()
         entry.uuid shouldBe expectedEntry.uuid
@@ -176,11 +130,46 @@ class DatabaseBuilderDslTest {
         entry.times?.expires shouldBe (expectedEntry.expires != null)
     }
 
-    private fun newDbFile(): File {
-        return tempDir.resolve("db.kdbx").toFile()
+    @Test
+    fun `entry should have history`() {
+        val db = newDatabaseWithHistory(PASSWORD_KEY).toByteArray()
+        val actualEntities = db.readDatabaseEntities(PASSWORD_KEY)
+
+        actualEntities[0] shouldBe ROOT_GROUP
+        actualEntities[1] shouldBe ENTRY_WITH_HISTORY
     }
 
-    private fun newKeyFile(): File {
-        return tempDir.resolve("key").toFile()
+    @Test
+    fun `entry should have binaries`() {
+        val db = newDatabaseWithBinaries(PASSWORD_KEY).toByteArray()
+        val actualEntities = db.readDatabaseEntities(PASSWORD_KEY)
+
+        actualEntities[0] shouldBe ROOT_GROUP
+        actualEntities[1] shouldBe ENTRY_WITH_BINARIES
+    }
+
+    private fun File.readDatabase(key: DatabaseKey): KeePassDatabase {
+        return KeePassDatabase.decode(
+            inputStream = FileInputStream(this),
+            credentials = key.toCredentials()
+        )
+    }
+
+    private fun ByteArray.readDatabaseEntities(key: DatabaseKey): List<DatabaseEntity> {
+        return KeePassDatabase.decode(
+            inputStream = ByteArrayInputStream(this),
+            credentials = key.toCredentials()
+        )
+            .buildNodeTree()
+            .traverseAndCollect { node -> node.originalEntity }
+    }
+
+    private fun Database<DatabaseElement, KeePassDatabase>.collectAllEntities():
+        List<DatabaseEntity> {
+        return root.traverseAndCollect { node -> node.originalEntity }
+    }
+
+    private fun newDbFile(): File {
+        return tempDir.resolve("db.kdbx").toFile()
     }
 }

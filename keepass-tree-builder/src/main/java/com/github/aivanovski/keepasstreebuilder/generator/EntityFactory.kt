@@ -1,8 +1,10 @@
 package com.github.aivanovski.keepasstreebuilder.generator
 
 import com.github.aivanovski.keepasstreebuilder.Fields
+import com.github.aivanovski.keepasstreebuilder.model.Binary
 import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
+import com.github.aivanovski.keepasstreebuilder.utils.ShaUtils
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -35,7 +37,8 @@ object EntityFactory {
         uuid: UUID = newEntryUuid(id),
         title: String = "Entry $id",
         history: List<EntryEntity> = emptyList(),
-        custom: Map<String, String> = emptyMap()
+        custom: Map<String, String> = emptyMap(),
+        binaries: List<Binary> = emptyList()
     ): EntryEntity {
         val defaultFields = mapOf(
             Fields.TITLE to title,
@@ -51,7 +54,19 @@ object EntityFactory {
             modified = MODIFIED_TIMESTAMP,
             expires = EXPIRATION_TIMESTAMP,
             fields = defaultFields.plus(custom),
-            history = history
+            history = history,
+            binaries = binaries
+        )
+    }
+
+    fun newBinaryFrom(
+        name: String,
+        content: ByteArray
+    ): Binary {
+        return Binary(
+            name = name,
+            hash = ShaUtils.sha256(content),
+            data = content
         )
     }
 

@@ -3,7 +3,7 @@ package com.github.aivanovski.keepasstreebuilder.extensions
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseNode
 import java.util.LinkedList
 
-fun <T, R> DatabaseNode<T>.traverse(transform: (node: DatabaseNode<T>) -> R): List<R> {
+fun <T, R> DatabaseNode<T>.traverseAndCollect(transform: (node: DatabaseNode<T>) -> R): List<R> {
     val nodes = LinkedList<DatabaseNode<T>>()
     nodes.add(this)
 

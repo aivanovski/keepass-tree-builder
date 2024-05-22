@@ -4,7 +4,10 @@ import app.keemobile.kotpass.cryptography.EncryptedValue
 import app.keemobile.kotpass.database.Credentials
 import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.database.encode
+import app.keemobile.kotpass.database.modifiers.modifyBinaries
 import app.keemobile.kotpass.database.modifiers.modifyGroup
+import app.keemobile.kotpass.models.BinaryData
+import app.keemobile.kotpass.models.BinaryReference
 import app.keemobile.kotpass.models.DatabaseElement
 import app.keemobile.kotpass.models.Entry
 import app.keemobile.kotpass.models.EntryFields
@@ -14,6 +17,8 @@ import app.keemobile.kotpass.models.Meta
 import app.keemobile.kotpass.models.TimeData
 import com.github.aivanovski.keepasstreebuilder.Fields
 import com.github.aivanovski.keepasstreebuilder.converter.Converter
+import com.github.aivanovski.keepasstreebuilder.extensions.toByteString
+import com.github.aivanovski.keepasstreebuilder.extensions.traverseAndCollect
 import com.github.aivanovski.keepasstreebuilder.model.Database
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseNode
@@ -22,6 +27,7 @@ import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
+import okio.ByteString.Companion.toByteString
 
 class KotpassDatabaseConverter :
     Converter<Group, Entry, DatabaseElement, KeePassDatabase> {
@@ -51,9 +57,30 @@ class KotpassDatabaseConverter :
             credentials = key.toCredentials()
         )
 
-        val result = db.modifyGroup(db.content.group.uuid) {
-            root.entity
-        }
+        val allBinaries = root
+            .traverseAndCollect { node ->
+                val entity = node.originalEntity
+                if (entity is EntryEntity) {
+                    entity.binaries
+                } else {
+                    emptyList()
+                }
+            }
+            .flatten()
+            .associate { binary ->
+                binary.hash.toByteString() to BinaryData.Uncompressed(
+                    memoryProtection = false,
+                    rawContent = binary.data
+                )
+            }
+
+        val result = db
+            .modifyGroup(db.content.group.uuid) {
+                root.entity
+            }
+            .modifyBinaries {
+                allBinaries
+            }
 
         return Database(
             underlying = result,
@@ -84,7 +111,7 @@ class KotpassDatabaseConverter :
     }
 
     private fun EntryEntity.toKotpassEntry(): Entry {
-        val fields = fields.map { (key, value) ->
+        val kotpassFields = fields.map { (key, value) ->
             val kotpassValue = when (key) {
                 Fields.PASSWORD -> EntryValue.Encrypted(EncryptedValue.fromString(value))
                 else -> EntryValue.Plain(value)
@@ -94,13 +121,22 @@ class KotpassDatabaseConverter :
         }
             .toMap()
 
-        val historyEntries = history.map { entry ->
+        val kotpassHistory = history.map { entry ->
             entry.toKotpassEntry()
+        }
+
+        val kotpassBinaries = binaries.map { binary ->
+            val hashData = binary.hash.data
+
+            BinaryReference(
+                hash = hashData.toByteString(0, hashData.size),
+                name = binary.name
+            )
         }
 
         return Entry(
             uuid = uuid,
-            fields = EntryFields(fields),
+            fields = EntryFields(kotpassFields),
             times = TimeData(
                 creationTime = created,
                 lastAccessTime = null,
@@ -109,7 +145,8 @@ class KotpassDatabaseConverter :
                 expiryTime = expires,
                 expires = (expires != null)
             ),
-            history = historyEntries
+            history = kotpassHistory,
+            binaries = kotpassBinaries
         )
     }
 
