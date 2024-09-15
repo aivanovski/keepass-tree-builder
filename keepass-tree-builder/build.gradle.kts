@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.9.22")
+    id("org.jetbrains.kotlin.jvm").version("1.9.23")
     id("java-library")
     id("maven-publish")
     id("io.gitlab.arturbosch.detekt") version "1.22.0"
@@ -60,11 +60,11 @@ dependencies {
     testImplementation("io.mockk:mockk:1.12.3")
 
     // Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.22")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.23")
 
     // KeePass
-    implementation("com.github.anvell:kotpass:0.7.0")
-    implementation("com.squareup.okio:okio:3.2.0")
+    implementation("app.keemobile:kotpass:0.10.0")
+    implementation("com.squareup.okio:okio:3.9.0")
 }
 
 publishing {
