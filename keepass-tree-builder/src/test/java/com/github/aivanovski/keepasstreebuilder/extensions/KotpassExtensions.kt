@@ -64,9 +64,7 @@ private fun Group.toEntity(): GroupEntity {
     )
 }
 
-private fun Entry.toEntity(
-    allBinaries: Map<ByteString, BinaryData> = emptyMap()
-): EntryEntity {
+private fun Entry.toEntity(allBinaries: Map<ByteString, BinaryData> = emptyMap()): EntryEntity {
     val fields = mutableMapOf<String, String>()
 
     for ((key, value) in this.fields.entries) {

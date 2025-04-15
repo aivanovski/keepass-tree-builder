@@ -1,25 +1,26 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
-    id("org.jetbrains.kotlin.jvm").version("1.9.23")
+    alias(libs.plugins.kotlinJvm)
     id("java-library")
     id("maven-publish")
-    id("io.gitlab.arturbosch.detekt") version "1.22.0"
+    alias(libs.plugins.detekt)
     jacoco
 }
 
 val appGroupId = "com.github.aivanovski"
 val appArtifactId = "keepass-tree-builder"
-val appVersion = "0.4.0"
+val appVersion = libs.versions.appVersion.get()
 
 group = appGroupId
 version = appVersion
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        apiVersion = "1.5"
-        languageVersion = "1.5"
-        jvmTarget = "11"
+kotlin {
+    compilerOptions {
+        apiVersion.set(KotlinVersion.KOTLIN_1_8)
+        languageVersion.set(KotlinVersion.KOTLIN_1_8)
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 
@@ -53,18 +54,13 @@ detekt {
 }
 
 dependencies {
-    // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.2")
-    testImplementation("io.kotest:kotest-assertions-core-jvm:5.5.2")
-    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.5.2")
-    testImplementation("io.mockk:mockk:1.12.3")
+    testImplementation(libs.junit)
+    testImplementation(libs.kotest.runner)
+    testImplementation(libs.kotest.assertions)
+    testImplementation(libs.mockk)
 
-    // Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.23")
-
-    // KeePass
-    implementation("app.keemobile:kotpass:0.10.0")
-    implementation("com.squareup.okio:okio:3.9.0")
+    implementation(libs.kotpass)
+    implementation(libs.okio)
 }
 
 publishing {
