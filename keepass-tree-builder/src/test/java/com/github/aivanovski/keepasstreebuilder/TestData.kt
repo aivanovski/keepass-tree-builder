@@ -55,9 +55,7 @@ object TestData {
         binaries = listOf(SVG_BINARY, PNG_BINARY, TEXT_BINARY)
     )
 
-    fun newDatabase(
-        key: DatabaseKey
-    ): Database<DatabaseElement, KeePassDatabase> {
+    fun newDatabase(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(key)
             .content(ROOT_GROUP) {
@@ -73,9 +71,7 @@ object TestData {
             .build()
     }
 
-    fun newDatabaseWithHistory(
-        key: DatabaseKey
-    ): Database<DatabaseElement, KeePassDatabase> {
+    fun newDatabaseWithHistory(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(key)
             .content(ROOT_GROUP) {
@@ -84,9 +80,7 @@ object TestData {
             .build()
     }
 
-    fun newDatabaseWithBinaries(
-        key: DatabaseKey
-    ): Database<DatabaseElement, KeePassDatabase> {
+    fun newDatabaseWithBinaries(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> {
         return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(key)
             .content(ROOT_GROUP) {

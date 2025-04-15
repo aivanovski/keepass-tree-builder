@@ -1,0 +1,27 @@
+[versions]
+appVersion = "0.4.0"
+
+# Build tooling
+kotlin = "2.1.20"
+detekt = "1.23.7"
+
+# Testing
+kotest = "5.5.2"
+junit = "5.5.2"
+mockk = "1.12.3"
+
+# Core dependencies
+kotpass = "0.10.0"
+okio = "3.9.0"
+
+[plugins]
+kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+
+[libraries]
+kotest-assertions = { module = "io.kotest:kotest-assertions-core-jvm", version.ref = "kotest" }
+kotest-runner = { module = "io.kotest:kotest-runner-junit5-jvm", version.ref = "kotest" }
+junit = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+kotpass = { module = "app.keemobile:kotpass", version.ref = "kotpass" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }

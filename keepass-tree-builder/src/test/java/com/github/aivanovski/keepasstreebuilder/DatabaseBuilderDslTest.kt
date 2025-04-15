@@ -56,7 +56,7 @@ class DatabaseBuilderDslTest {
                 .readDatabaseEntities(key)
 
             // assert
-            entities shouldBe db.collectAllEntities()
+            entities shouldBe collectAllEntities(db)
         }
     }
 
@@ -77,7 +77,7 @@ class DatabaseBuilderDslTest {
             .readBytes()
             .readDatabaseEntities(PASSWORD_KEY)
 
-        actualEntities shouldBe db.collectAllEntities()
+        actualEntities shouldBe collectAllEntities(db)
     }
 
     @Test
@@ -164,9 +164,10 @@ class DatabaseBuilderDslTest {
             .traverseAndCollect { node -> node.originalEntity }
     }
 
-    private fun Database<DatabaseElement, KeePassDatabase>.collectAllEntities():
-        List<DatabaseEntity> {
-        return root.traverseAndCollect { node -> node.originalEntity }
+    private fun collectAllEntities(
+        db: Database<DatabaseElement, KeePassDatabase>
+    ): List<DatabaseEntity> {
+        return db.root.traverseAndCollect { node -> node.originalEntity }
     }
 
     private fun newDbFile(): File {
