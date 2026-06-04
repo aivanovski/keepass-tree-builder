@@ -11,7 +11,7 @@ junit = "5.5.2"
 mockk = "1.12.3"
 
 # Core dependencies
-kotpass = "0.10.0"
+kotpass = "0.13.0"
 okio = "3.9.0"
 
 [plugins]
