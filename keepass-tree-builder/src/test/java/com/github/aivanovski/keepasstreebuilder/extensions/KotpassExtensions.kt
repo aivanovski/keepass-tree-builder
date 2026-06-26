@@ -55,14 +55,13 @@ fun KeePassDatabase.buildNodeTree(): DatabaseNode<DatabaseEntity> {
     return root
 }
 
-private fun Group.toEntity(): GroupEntity {
-    return GroupEntity(
+private fun Group.toEntity(): GroupEntity =
+    GroupEntity(
         uuid = uuid,
         fields = mapOf(
             Fields.TITLE to name
         )
     )
-}
 
 private fun Entry.toEntity(allBinaries: Map<ByteString, BinaryData> = emptyMap()): EntryEntity {
     val fields = mutableMapOf<String, String>()

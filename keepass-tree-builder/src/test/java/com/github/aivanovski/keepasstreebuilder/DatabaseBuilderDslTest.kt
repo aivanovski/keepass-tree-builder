@@ -2,6 +2,8 @@ package com.github.aivanovski.keepasstreebuilder
 
 import app.keemobile.kotpass.database.KeePassDatabase
 import app.keemobile.kotpass.database.decode
+import app.keemobile.kotpass.database.header.DatabaseHeader
+import app.keemobile.kotpass.database.header.KdfParameters
 import app.keemobile.kotpass.models.DatabaseElement
 import app.keemobile.kotpass.models.EntryValue
 import com.github.aivanovski.keepasstreebuilder.DatabaseBuilderDsl.newBuilder
@@ -25,6 +27,7 @@ import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newEntry
 import com.github.aivanovski.keepasstreebuilder.model.Database
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseEntity
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
+import com.github.aivanovski.keepasstreebuilder.model.KeyHashingAlgorithm
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.beInstanceOf
@@ -148,29 +151,83 @@ class DatabaseBuilderDslTest {
         actualEntities[1] shouldBe ENTRY_WITH_BINARIES
     }
 
-    private fun File.readDatabase(key: DatabaseKey): KeePassDatabase {
-        return KeePassDatabase.decode(
+    @Test
+    fun `should use AES key hashing algorithm by default`() {
+        // arrange
+        val db = newBuilder(KotpassDatabaseConverter())
+            .key(PASSWORD_KEY)
+            .content(ROOT_GROUP) {
+                entry(newEntryFrom(1))
+            }
+            .build()
+
+        // act
+        val actualDb = KeePassDatabase.decode(
+            inputStream = ByteArrayInputStream(db.toByteArray()),
+            credentials = PASSWORD_KEY.toCredentials()
+        )
+
+        // assert
+        val kdfParameters = (actualDb.header as DatabaseHeader.Ver4x).kdfParameters
+        kdfParameters should beInstanceOf(KdfParameters.Aes::class)
+    }
+
+    @Test
+    fun `should work with different hashing algorithm`() {
+        listOf(
+            KeyHashingAlgorithm.Aes.default(),
+            KeyHashingAlgorithm.Argon2d.default(),
+            KeyHashingAlgorithm.Argon2id.default()
+        ).forEach { algorithm ->
+            // arrange
+            val db = newDatabase(
+                key = PASSWORD_KEY,
+                keyHashingAlgorithm = algorithm
+            )
+
+            // act
+            val actualDb = KeePassDatabase.decode(
+                inputStream = ByteArrayInputStream(db.toByteArray()),
+                credentials = PASSWORD_KEY.toCredentials()
+            )
+
+            // assert
+            val kdfParameters = (actualDb.header as DatabaseHeader.Ver4x).kdfParameters
+            when (algorithm) {
+                is KeyHashingAlgorithm.Aes -> {
+                    kdfParameters should beInstanceOf(KdfParameters.Aes::class)
+                }
+
+                is KeyHashingAlgorithm.Argon2d -> {
+                    (kdfParameters as KdfParameters.Argon2).variant shouldBe
+                        KdfParameters.Argon2.Variant.Argon2d
+                }
+
+                is KeyHashingAlgorithm.Argon2id -> {
+                    (kdfParameters as KdfParameters.Argon2).variant shouldBe
+                        KdfParameters.Argon2.Variant.Argon2id
+                }
+            }
+        }
+    }
+
+    private fun File.readDatabase(key: DatabaseKey): KeePassDatabase =
+        KeePassDatabase.decode(
             inputStream = FileInputStream(this),
             credentials = key.toCredentials()
         )
-    }
 
-    private fun ByteArray.readDatabaseEntities(key: DatabaseKey): List<DatabaseEntity> {
-        return KeePassDatabase.decode(
+    private fun ByteArray.readDatabaseEntities(key: DatabaseKey): List<DatabaseEntity> =
+        KeePassDatabase.decode(
             inputStream = ByteArrayInputStream(this),
             credentials = key.toCredentials()
         )
             .buildNodeTree()
             .traverseAndCollect { node -> node.originalEntity }
-    }
 
     private fun collectAllEntities(
         db: Database<DatabaseElement, KeePassDatabase>
-    ): List<DatabaseEntity> {
-        return db.root.traverseAndCollect { node -> node.originalEntity }
-    }
+    ): List<DatabaseEntity> = db.root.traverseAndCollect { node -> node.originalEntity }
 
-    private fun newDbFile(): File {
-        return tempDir.resolve("db.kdbx").toFile()
-    }
+    private fun newDbFile(): File = tempDir.resolve("db.kdbx").toFile()
 }

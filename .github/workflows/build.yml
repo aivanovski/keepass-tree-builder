@@ -13,29 +13,32 @@ jobs:
     name: 'Check code style'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout sources
+        uses: actions/checkout@v4
 
-      - name: Download ktlint binary
-        run: |
-          curl -sSLO https://github.com/pinterest/ktlint/releases/download/0.48.2/ktlint
-          chmod +x ktlint
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
 
-      - name: Run ktlint
-        run: ./ktlint --editorconfig=".editorconfig"
+      - name: Run ktlint check
+        run: ./gradlew ktlintCheck
 
   run-detekt:
     name: 'Run detekt'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: 11
+          distribution: temurin
+          java-version: 17
+          cache: gradle
 
       - name: Run detekt
         run: ./gradlew detektMain
@@ -45,13 +48,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: 11
+          distribution: temurin
+          java-version: 17
+          cache: gradle
 
       - name: Run tests
         run: ./gradlew test
@@ -68,17 +72,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup version variable
         run: |
           echo "VERSION=$(grep 'appVersion' gradle/libs.versions.toml | cut -d\" -f2)" >> $GITHUB_ENV
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: 11
+          distribution: temurin
+          java-version: 17
+          cache: gradle
 
       - name: Build jar
         run: ./gradlew jar
@@ -95,7 +100,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get coverage.csv
         uses: actions/download-artifact@v4

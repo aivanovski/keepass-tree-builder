@@ -18,9 +18,7 @@ sealed class DatabaseKey {
             return binaryData.contentEquals(other.binaryData)
         }
 
-        override fun hashCode(): Int {
-            return binaryData.contentHashCode()
-        }
+        override fun hashCode(): Int = binaryData.contentHashCode()
     }
 
     data class CompositeKey(

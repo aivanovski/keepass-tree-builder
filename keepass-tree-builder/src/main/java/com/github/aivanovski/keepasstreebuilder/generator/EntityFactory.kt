@@ -23,14 +23,13 @@ object EntityFactory {
         id: Any,
         uuid: UUID = newGroupUuid(id),
         title: String = "Group $id"
-    ): GroupEntity {
-        return GroupEntity(
+    ): GroupEntity =
+        GroupEntity(
             uuid = uuid,
             fields = mapOf(
                 Fields.TITLE to title
             )
         )
-    }
 
     fun newEntryFrom(
         id: Any,
@@ -62,25 +61,19 @@ object EntityFactory {
     fun newBinaryFrom(
         name: String,
         content: ByteArray
-    ): Binary {
-        return Binary(
+    ): Binary =
+        Binary(
             name = name,
             hash = ShaUtils.sha256(content),
             data = content
         )
-    }
 
-    private fun newGroupUuid(id: Any): UUID {
-        return UUID(GROUP_UID_SHIFT, id.hashCode().toLong())
-    }
+    private fun newGroupUuid(id: Any): UUID = UUID(GROUP_UID_SHIFT, id.hashCode().toLong())
 
-    private fun newEntryUuid(id: Any): UUID {
-        return UUID(ENTRY_UID_SHIFT, id.hashCode().toLong())
-    }
+    private fun newEntryUuid(id: Any): UUID = UUID(ENTRY_UID_SHIFT, id.hashCode().toLong())
 
-    private fun LocalDate.toInstant(): Instant {
-        return this.atStartOfDay()
+    private fun LocalDate.toInstant(): Instant =
+        this.atStartOfDay()
             .atZone(ZoneId.systemDefault())
             .toInstant()
-    }
 }

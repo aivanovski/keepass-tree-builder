@@ -5,6 +5,7 @@ import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseNode
 import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
+import com.github.aivanovski.keepasstreebuilder.model.KeyHashingAlgorithm
 
 interface Converter<Group, Entry, Element, DB> {
 
@@ -18,6 +19,7 @@ interface Converter<Group, Entry, Element, DB> {
 
     fun createDatabase(
         key: DatabaseKey,
-        root: DatabaseNode<Group>
+        root: DatabaseNode<Group>,
+        keyHashingAlgorithm: KeyHashingAlgorithm
     ): Database<Element, DB>
 }
