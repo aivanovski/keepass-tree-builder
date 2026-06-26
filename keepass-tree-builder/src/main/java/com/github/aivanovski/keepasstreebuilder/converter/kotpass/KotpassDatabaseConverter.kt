@@ -36,7 +36,6 @@ import com.github.aivanovski.keepasstreebuilder.model.KeyHashingAlgorithm
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.security.SecureRandom
 import java.util.Random
 import java.util.UUID
 import okio.ByteString
@@ -67,10 +66,13 @@ class KotpassDatabaseConverter : Converter<Group, Entry, DatabaseElement, KeePas
             credentials = key.toCredentials(),
             header = DatabaseHeader.Ver4x(
                 signature = Signature.Default,
-                version = FormatVersion(4, 1),
+                version = FormatVersion(
+                    major = KDBX_VERSION_MAJOR,
+                    minor = KDBX_VERSION_MINOR
+                ),
                 cipherId = BaseCiphers.Aes.uuid,
                 compression = DatabaseHeader.Compression.GZip,
-                masterSeed = random.nextByteString(32),
+                masterSeed = random.nextByteString(MASTER_SEED_LENGTH),
                 encryptionIV = random.nextByteString(BaseCiphers.Aes.ivLength.toInt()),
                 kdfParameters = keyHashingAlgorithm.toKdfParameters(),
                 publicCustomData = mapOf()
@@ -227,6 +229,9 @@ class KotpassDatabaseConverter : Converter<Group, Entry, DatabaseElement, KeePas
     companion object {
 
         private const val DATABASE_NAME = "Passwords"
+        private const val KDBX_VERSION_MAJOR = 4.toShort()
+        private const val KDBX_VERSION_MINOR = 1.toShort()
+        private const val MASTER_SEED_LENGTH = 32
         private const val KDF_SEED_LENGTH = 32
 
         fun DatabaseKey.toCredentials(): Credentials =

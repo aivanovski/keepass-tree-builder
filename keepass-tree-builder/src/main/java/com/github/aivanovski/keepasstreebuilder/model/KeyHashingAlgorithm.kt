@@ -2,7 +2,9 @@ package com.github.aivanovski.keepasstreebuilder.model
 
 sealed class KeyHashingAlgorithm {
 
-    data class Aes(val transformationRounds: ULong) : KeyHashingAlgorithm() {
+    data class Aes(
+        val transformationRounds: ULong
+    ) : KeyHashingAlgorithm() {
 
         companion object {
             fun default() =

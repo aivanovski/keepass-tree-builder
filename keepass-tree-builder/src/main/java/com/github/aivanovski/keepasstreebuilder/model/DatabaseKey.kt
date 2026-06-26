@@ -2,9 +2,13 @@ package com.github.aivanovski.keepasstreebuilder.model
 
 sealed class DatabaseKey {
 
-    data class PasswordKey(val password: String) : DatabaseKey()
+    data class PasswordKey(
+        val password: String
+    ) : DatabaseKey()
 
-    data class BinaryKey(val binaryData: ByteArray) : DatabaseKey() {
+    data class BinaryKey(
+        val binaryData: ByteArray
+    ) : DatabaseKey() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false
@@ -17,7 +21,10 @@ sealed class DatabaseKey {
         override fun hashCode(): Int = binaryData.contentHashCode()
     }
 
-    data class CompositeKey(val password: String, val binaryData: ByteArray) : DatabaseKey() {
+    data class CompositeKey(
+        val password: String,
+        val binaryData: ByteArray
+    ) : DatabaseKey() {
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
             if (javaClass != other?.javaClass) return false

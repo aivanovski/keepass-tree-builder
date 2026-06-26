@@ -6,6 +6,7 @@ plugins {
     id("java-library")
     id("maven-publish")
     alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
     jacoco
 }
 
@@ -18,8 +19,8 @@ version = appVersion
 
 kotlin {
     compilerOptions {
-        apiVersion.set(KotlinVersion.KOTLIN_1_8)
-        languageVersion.set(KotlinVersion.KOTLIN_1_8)
+        apiVersion.set(KotlinVersion.KOTLIN_2_2)
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
         jvmTarget.set(JvmTarget.JVM_11)
     }
 }
@@ -34,9 +35,9 @@ java {
 
 tasks.jacocoTestReport {
     reports {
-        val coverageDir = File("$buildDir/reports/coverage")
+        val coverageDir = layout.buildDirectory.dir("reports/coverage").get()
         csv.required.set(true)
-        csv.outputLocation.set(File(coverageDir, "coverage.csv"))
+        csv.outputLocation.set(coverageDir.file("coverage.csv"))
         html.required.set(true)
         html.outputLocation.set(coverageDir)
     }
