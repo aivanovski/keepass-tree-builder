@@ -6,15 +6,14 @@ import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseNode
 import com.github.aivanovski.keepasstreebuilder.model.EntryEntity
 import com.github.aivanovski.keepasstreebuilder.model.GroupEntity
+import com.github.aivanovski.keepasstreebuilder.model.KeyHashingAlgorithm
 import com.github.aivanovski.keepasstreebuilder.model.MutableDatabaseNode
 
 object DatabaseBuilderDsl {
 
     fun <Group, Entry, Element, DB> newBuilder(
         converter: Converter<Group, Entry, Element, DB>
-    ): DatabaseBuilder<Group, Entry, Element, DB> {
-        return DatabaseBuilder(converter)
-    }
+    ): DatabaseBuilder<Group, Entry, Element, DB> = DatabaseBuilder(converter)
 
     class DatabaseBuilder<Group, Entry, Element, DB> internal constructor(
         private val converter: Converter<Group, Entry, Element, DB>
@@ -23,6 +22,7 @@ object DatabaseBuilderDsl {
         private lateinit var root: GroupEntity
         private lateinit var content: DatabaseTreeBuilder<Group, Entry, Element>.() -> Unit
         private lateinit var key: DatabaseKey
+        private var keyHashingAlgorithm: KeyHashingAlgorithm = KeyHashingAlgorithm.Aes.default()
 
         fun content(
             root: GroupEntity,
@@ -38,6 +38,13 @@ object DatabaseBuilderDsl {
             return this
         }
 
+        fun keyHashingAlgorithm(
+            keyHashingAlgorithm: KeyHashingAlgorithm
+        ): DatabaseBuilder<Group, Entry, Element, DB> {
+            this.keyHashingAlgorithm = keyHashingAlgorithm
+            return this
+        }
+
         fun build(): Database<Element, DB> {
             val rootNode = DatabaseTreeBuilder(
                 element = root,
@@ -48,7 +55,11 @@ object DatabaseBuilderDsl {
                 }
                 .build()
 
-            return converter.createDatabase(key, rootNode as DatabaseNode<Group>)
+            return converter.createDatabase(
+                key = key,
+                root = rootNode as DatabaseNode<Group>,
+                keyHashingAlgorithm = keyHashingAlgorithm
+            )
         }
     }
 
@@ -87,8 +98,8 @@ object DatabaseBuilderDsl {
             nodes.add(node as MutableDatabaseNode<Element>)
         }
 
-        fun build(): MutableDatabaseNode<Element> {
-            return MutableDatabaseNode(
+        fun build(): MutableDatabaseNode<Element> =
+            MutableDatabaseNode(
                 entity = converter.createGroup(
                     group = element,
                     groups = groups,
@@ -97,6 +108,5 @@ object DatabaseBuilderDsl {
                 originalEntity = element,
                 nodes = nodes
             )
-        }
     }
 }

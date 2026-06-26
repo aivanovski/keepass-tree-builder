@@ -20,6 +20,7 @@ dependencies {
 ```kotlin
 DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
     .key(DatabaseKey.PasswordKey("123456"))
+    .keyHashingAlgorithm(KeyHashingAlgorithm.Argon2id)
     .content(newGroupFrom("Root Group")) {
         group(newGroupFrom("Group A")) {
             group(newGroupFrom("Group B"))

@@ -1,10 +1,6 @@
 package com.github.aivanovski.keepasstreebuilder.model
 
-data class Binary(
-    val name: String,
-    val hash: Hash,
-    val data: ByteArray
-) {
+data class Binary(val name: String, val hash: Hash, val data: ByteArray) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

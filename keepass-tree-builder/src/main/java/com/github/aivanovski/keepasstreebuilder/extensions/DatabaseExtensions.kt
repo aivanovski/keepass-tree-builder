@@ -15,8 +15,7 @@ fun Database<*, *>.writeToFile(file: File) {
     input.close()
 }
 
-fun Database<*, *>.toByteArray(): ByteArray {
-    return contentFactory.invoke().use { input ->
+fun Database<*, *>.toByteArray(): ByteArray =
+    contentFactory.invoke().use { input ->
         input.readAllBytes()
     }
-}

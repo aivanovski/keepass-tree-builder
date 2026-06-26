@@ -9,6 +9,7 @@ import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newEntry
 import com.github.aivanovski.keepasstreebuilder.generator.EntityFactory.newGroupFrom
 import com.github.aivanovski.keepasstreebuilder.model.Database
 import com.github.aivanovski.keepasstreebuilder.model.DatabaseKey
+import com.github.aivanovski.keepasstreebuilder.model.KeyHashingAlgorithm
 
 object TestData {
 
@@ -55,9 +56,13 @@ object TestData {
         binaries = listOf(SVG_BINARY, PNG_BINARY, TEXT_BINARY)
     )
 
-    fun newDatabase(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> {
-        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+    fun newDatabase(
+        key: DatabaseKey,
+        keyHashingAlgorithm: KeyHashingAlgorithm = KeyHashingAlgorithm.Aes.default()
+    ): Database<DatabaseElement, KeePassDatabase> =
+        DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(key)
+            .keyHashingAlgorithm(keyHashingAlgorithm)
             .content(ROOT_GROUP) {
                 group(newGroupFrom('A')) {
                     entry(newEntryFrom(1))
@@ -69,23 +74,20 @@ object TestData {
                 }
             }
             .build()
-    }
 
-    fun newDatabaseWithHistory(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> {
-        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+    fun newDatabaseWithHistory(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> =
+        DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(key)
             .content(ROOT_GROUP) {
                 entry(ENTRY_WITH_HISTORY)
             }
             .build()
-    }
 
-    fun newDatabaseWithBinaries(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> {
-        return DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
+    fun newDatabaseWithBinaries(key: DatabaseKey): Database<DatabaseElement, KeePassDatabase> =
+        DatabaseBuilderDsl.newBuilder(KotpassDatabaseConverter())
             .key(key)
             .content(ROOT_GROUP) {
                 entry(ENTRY_WITH_BINARIES)
             }
             .build()
-    }
 }

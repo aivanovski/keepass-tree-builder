@@ -7,10 +7,7 @@ sealed interface DatabaseEntity {
     val uuid: UUID
 }
 
-data class GroupEntity(
-    override val uuid: UUID,
-    val fields: Map<String, String>
-) : DatabaseEntity
+data class GroupEntity(override val uuid: UUID, val fields: Map<String, String>) : DatabaseEntity
 
 data class EntryEntity(
     override val uuid: UUID,
