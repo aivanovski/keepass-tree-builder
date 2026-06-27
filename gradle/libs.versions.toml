@@ -1,5 +1,5 @@
 [versions]
-appVersion = "0.5.0"
+appVersion = "0.5.1"
 
 # Build tooling
 kotlin = "2.2.20"
