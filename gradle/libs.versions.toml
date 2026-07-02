@@ -8,7 +8,7 @@ ktlint = "14.0.1"
 
 # Testing
 kotest = "6.2.1"
-junit = "6.1.0"
+junit = "6.1.1"
 mockk = "1.14.11"
 
 # Core dependencies
