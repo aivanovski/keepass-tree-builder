@@ -2,7 +2,7 @@
 appVersion = "0.5.1"
 
 # Build tooling
-kotlin = "2.2.20"
+kotlin = "2.4.10"
 detekt = "1.23.8"
 ktlint = "14.2.0"
 
