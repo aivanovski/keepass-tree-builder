@@ -4,7 +4,7 @@ appVersion = "0.5.1"
 # Build tooling
 kotlin = "2.2.20"
 detekt = "1.23.8"
-ktlint = "14.0.1"
+ktlint = "14.2.0"
 
 # Testing
 kotest = "6.2.3"
