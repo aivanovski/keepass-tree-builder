@@ -13,7 +13,7 @@ mockk = "1.14.11"
 
 # Core dependencies
 kotpass = "0.13.0"
-okio = "3.17.0"
+okio = "3.18.0"
 
 [plugins]
 kotlinJvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
